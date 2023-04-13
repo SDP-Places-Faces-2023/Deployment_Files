@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+    ports:
+      - '9050:5432'
+    volumes:
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - db:/var/lib/postgresql/data
+    networks:
+      - app-network
+    entrypoint: "docker-entrypoint.sh"
+    command: ["postgres", "-c", "fsync=off"]
+
+  backend:
+    build: ./Django-General
+    ports:
+      - '9000:9000'
+    depends_on:
+      - db
+    networks:
+      - app-network
+    environment:
+       RTSP_URL: rtsp://192.168.0.102:8080/h264_ulaw.sdp
+       DJANGO_SETTINGS_MODULE: generalapp.settings
+       ALLOWED_HOSTS: '*'
+    # network_mode: "host"
+
+  fastapi:
+    build: ./FastAPI-Modeling
+    ports:
+      - '8000:8000'
+    networks:
+      - app-network
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+    # ipam:
+    #   config:
+    #     - subnet: 192.168.33.0/24
