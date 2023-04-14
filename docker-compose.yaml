@@ -26,7 +26,7 @@ services:
     networks:
       - app-network
     environment:
-       RTSP_URL: rtsp://192.168.0.102:8080/h264_ulaw.sdp
+       RTSP_URL: rtsp://10.0.47.48:8080/h264_ulaw.sdp
        DJANGO_SETTINGS_MODULE: generalapp.settings
        ALLOWED_HOSTS: '*'
     # network_mode: "host"
@@ -35,6 +35,13 @@ services:
     build: ./FastAPI-Modeling
     ports:
       - '8000:8000'
+    networks:
+      - app-network
+
+  frontend:
+    build: ./Django-Front
+    ports:
+      - '4200:80'
     networks:
       - app-network
 
